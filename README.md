@@ -1,73 +1,138 @@
-# React + TypeScript + Vite
+# 🕐 Apple Watch–Style Homescreen (React + Framer Motion)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A fully interactive **Apple Watch–like homescreen grid** built using **React**, **TypeScript**, and **Framer Motion**.
+Each icon dynamically scales and fades based on distance from the drag position, creating a realistic “bubbly” watchOS effect.
 
-Currently, two official plugins are available:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-## React Compiler
+## 💡 Core Idea
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Apple’s watchOS homescreen arranges icons in a **hexagonal grid** that moves fluidly under your finger.
+This project replicates that behavior using:
 
-## Expanding the ESLint configuration
+- Mathematical grid generation (controlled spacing + staggered rows)
+- MotionValue-based drag physics
+- Dynamic transforms via `useTransform`
+- Declarative animation using Framer Motion’s `motion.div`
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## ⚙️ Tech Stack
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+| Layer | Technology | Purpose |
+|-------|-------------|----------|
+| UI | **React + TypeScript** | Component-based structure |
+| Motion | **Framer Motion (motion/react)** | Smooth dragging, scale, opacity transforms |
+| Styling | **Tailwind CSS** | Fast, utility-first design system |
+| State | **MotionValue hooks** | Reactive animation data |
+| Assets | Local PNGs | Icon visualization |
+| Build | Vite / Next.js | Modern bundling + HMR |
+
+
+
+## 🧩 Folder Structure
+
+```
+src/
+├── App.tsx
+├── components/
+│ ├── IconGrid.tsx
+│ ├── IconCircle.tsx
+├── config/
+│ ├── gridConfig.ts
+│ ├── icons.ts
+├── hooks/
+│ ├── useImagesLoaded.ts
+├── utils/
+│ ├── generateCircles.ts
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## 🧮 Grid Generation Logic
+
+`generateCircles()` computes coordinates for each icon using offset rows (like a honeycomb):
+
+```ts
+const  y  =  -totalHeight /  2  + row * spacingY;
+const  x  = rowStartX + col * spacingX;
 ```
+
+Even rows have `cols` icons; odd rows have `cols - 1`.
+Edge rows are trimmed to simulate curvature.
+
+
+
+## ⚡ Motion System
+
+```ts
+const  x  =  useMotionValue(0);
+const  y  =  useMotionValue(0);
+```  
+
+Each icon reacts through **derived transforms**:
+```ts
+const  distance  =  useTransform([x, y], (values) => {
+	const [latestX, latestY] = values;
+	const  dx  =  -latestX - circleX;
+	const  dy  =  -latestY - circleY;
+	return  Math.sqrt(dx **  2  *  0.06  + dy **  2  *  0.02);
+});
+```
+
+This allows per-icon scaling and opacity updates without re-rendering the React tree.
+
+
+
+## 🕓 Image Preloading
+
+All icons are preloaded via the custom `useImagesLoaded()` hook before rendering:
+
+```ts
+const  allLoaded  =  useImagesLoaded(icons);
+```
+
+  
+
+## 🚀 Running Locally
+
+```bash
+git  clone  https://github.com/your-username/apple-watch-homescreen.git
+cd  apple-watch-homescreen
+npm  install
+npm  run  dev
+```
+
+Then open `http://localhost:5173/`.
+
+  
+
+## 🧰 Developer Notes
+
+- Stateless animation (MotionValues)
+- Declarative transforms
+- Functional grid math
+- Composable architecture
+
+  
+
+## 🧪 Future Enhancements
+
+- Dynamic zoom
+- App-launch animation
+- 3D parallax
+- GPU-accelerated filters
+
+
+
+## 🧑‍💻 Author
+
+**Haris Amjad**
+Software Engineer • Full Stack Developer • UI/UX Designer
+[LinkedIn](https://www.linkedin.com/in/harisamjad-pro/) | [GitHub](https://github.com/harisamjad-pro/)
+
+
+
+## 🪩 License
+
+MIT License © 2025 Haris Amjad
